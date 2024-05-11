@@ -2,10 +2,14 @@ const express = require("express");
 const PORT = 3000;
 
 // Zod schemas for todo
-const { createTodoSchema, updateTodoSchema } = require("./types");
+const {
+  createTodoSchema,
+  updateTodoSchema,
+  completeTodoSchema,
+} = require("./types");
 const app = express();
 
-const { todo } = require("./db");
+const { Todo } = require("./db");
 
 // Body Parser
 app.use(express.json());
@@ -26,7 +30,7 @@ app.post("/todo", async (req, res) => {
   }
 
   // put it in mongo db
-  await todo.create({
+  await Todo.create({
     title: parsedData.data.title,
     description: parsedData.data.description,
     completed: false,
@@ -39,7 +43,7 @@ app.post("/todo", async (req, res) => {
 
 // Get todo
 app.get("/todos", async (req, res) => {
-  const todos = await todo.find();
+  const todos = await Todo.find();
   console.log(todos);
   res.status(200).json({
     message: "success",
@@ -54,7 +58,24 @@ app.put("/update-todo", (req, res) => {});
 app.delete("/delete-todo", (req, res) => {});
 
 // Mark Completed
-app.post("/completed", (req, res) => {});
+app.post("/completed", async (req, res) => {
+  const data = req.body;
+  const parsedData = completeTodoSchema.safeParse(data);
+  if (!parsedData.success) {
+    res.status(411).json({
+      message: "You send wrong input",
+    });
+    return;
+  }
+  const todo = await Todo.findByIdAndUpdate(
+    { _id: parsedData.data.id },
+    { completed: true }
+  );
+  res.status(200).json({
+    message: "Todo Mark done",
+    id: todo._id,
+  });
+});
 
 // Run server
 app.listen(PORT, () => {
