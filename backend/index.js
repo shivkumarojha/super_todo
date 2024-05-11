@@ -52,10 +52,48 @@ app.get("/todos", async (req, res) => {
 });
 
 // update Todo
-app.put("/update-todo", (req, res) => {});
+app.put("/update-todo/:id", async (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+  const parsedData = updateTodoSchema.safeParse(data);
+  if (!parsedData.success) {
+    res.status(411).json({
+      message: "You send wrong input",
+    });
+    return;
+  }
+  try {
+    const todo = await Todo.findByIdAndUpdate(
+      { _id: id },
+      {
+        title: parsedData.data.title,
+        description: parsedData.data.description,
+        completed: parsedData.data.completed,
+      }
+    );
+    res.status(200).json({
+      message: "Todo is updated",
+      id: todo._id,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 // Delete todo
-app.delete("/delete-todo", (req, res) => {});
+app.delete("/delete-todo/:id", async (req, res) => {
+  const id = req.params.id;
+  const todo = await Todo.findOneAndDelete({ _id: id });
+  console.log(todo);
+  if (!todo) {
+    return res.status(401).json({
+      message: "Todo doesn't exist",
+    });
+  }
+  res.status(200).json({
+    message: "Todo Deleted successfully",
+  });
+});
 
 // Mark Completed
 app.post("/completed", async (req, res) => {
