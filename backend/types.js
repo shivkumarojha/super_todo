@@ -13,13 +13,13 @@ const completeTodoSchema = zod.object({
 
 // Zod schema for update todo
 const updateTodoSchema = zod.object({
-  id: zod.string(),
   title: zod.string(),
-  descriptilon: zod.string(),
+  description: zod.string(),
+  completed: zod.string()
 });
 
 module.exports = {
   createTodoSchema,
   updateTodoSchema,
-  completeTodoSchema
+  completeTodoSchema,
 };
