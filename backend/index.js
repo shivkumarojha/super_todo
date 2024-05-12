@@ -1,6 +1,6 @@
 const express = require("express");
 const PORT = 3000;
-
+const cors = require("cors");
 // Zod schemas for todo
 const {
   createTodoSchema,
@@ -9,6 +9,7 @@ const {
 } = require("./types");
 const app = express();
 
+app.use(cors());
 const { Todo } = require("./db");
 
 // Body Parser
